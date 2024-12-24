@@ -37,7 +37,7 @@
         }
 
         perlinNoise3D(args) {
-            const value = quickNoise.noise(args.X, args.Y, args.Z);
+            const value = 10;//quickNoise.noise(args.X, args.Y, args.Z);
 
             return value;
         }
