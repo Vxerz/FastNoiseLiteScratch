@@ -3,7 +3,7 @@
 
     class PerlinNoise {
         constructor() {
-            this.seed = Math.random();
+            this.time = 0;
         }
 
         getInfo() {
@@ -32,15 +32,37 @@
                             },
                         },
                     },
+					{
+						opcode: 'startTime',
+						blockType: Scratch.BlockType.COMMAND,
+						text: "Start timer",
+					},
+					{
+						opcode: 'getTime',
+						blockType: Scratch.BlockType.REPORTER,
+						text: "Get current time",
+					},
                 ],
             };
         }
 
-        perlinNoise3D(args) {
-            const value = 10;//quickNoise.noise(args.X, args.Y, args.Z);
+        perlinNoise3D(args)
+		{
+            const value = quickNoise.noise(args.X, args.Y, args.Z);
 
             return value;
         }
+
+		startTime()
+		{
+			this.time = performance.now();
+		}
+
+		getTime()
+		{
+			const tempTime = performance.now();
+			return(tempTime-this.time);
+		}
     }
 
     Scratch.extensions.register(new PerlinNoise());
