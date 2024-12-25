@@ -23,7 +23,7 @@ const ArgumentType = Scratch.ArgumentType;
 					{
 						opcode: 'initNoise',
 						blockType: BlockType.COMMAND,
-						text: 'create noise id:[ID] type:[TYPE] octaves:[OCTAVES] frequency:[FREQUENCY] seed:[SEED]',
+						text: 'create noise id:[ID] type:[TYPE] octaves:[OCTAVES] frequency:[FREQUENCY] fractal: [FRACTAL] seed:[SEED]',
 						arguments: {
 							ID: {
 								type: ArgumentType.STRING,
@@ -41,6 +41,11 @@ const ArgumentType = Scratch.ArgumentType;
 							FREQUENCY: {
 								type: ArgumentType.NUMBER,
 								defaultValue: '0.01',
+							},
+                            FRACTAL: {
+								type: ArgumentType.STRING,
+                                menu: 'FRACTAL_TYPE',
+								defaultValue: 'FBm',
 							},
 							SEED: {
 								type: ArgumentType.NUMBER,
@@ -76,7 +81,11 @@ const ArgumentType = Scratch.ArgumentType;
 					NOISE_TYPE: {
 						acceptReporters: false,
 						items: ['OpenSimpex2', 'OpenSimpex2S', 'Cellular', 'Perlin', 'Value Cubic', 'Value'],
-					}
+					},
+                    FRACTAL_TYPE: {
+                        acceptReporters: false,
+                        items: ['None', 'FMb', 'Ridged', 'Ping Pong'],
+                    }
 				}
             };
         }
@@ -104,7 +113,20 @@ const ArgumentType = Scratch.ArgumentType;
 					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.Value);
 					break;
 			  }
-			  noises[args.ID].SetFractalType(FastNoiseLite.FractalType.FBm);
+              switch(args.FRACTAL) {
+				case "None":
+					noises[args.ID].SetFractalType(FastNoiseLite.FractalType.None);
+					break;
+				case "FMb":
+					noises[args.ID].SetFractalType(FastNoiseLite.FractalType.FBm);
+					break;
+				case "Ridged":
+					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.Ridged);
+					break;
+				case "Ping Pong":
+					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.PingPong);
+					break;
+			  }
 			  noises[args.ID].SetFrequency(args.FREQUENCY);
 			  noises[args.ID].SetFractalOctaves(args.OCTAVES);
 		}
