@@ -1,6 +1,6 @@
 # FASTNOISELITE TURBOWARP EXTENSION
-*I DID NOT MAKE THE PERLIN NOISE*
-i simply made it a scratch extension
+*I DID NOT MAKE THE NOISE*
+i simply turned it into an extension
 
 for the noise i used go here:
 https://github.com/Auburn/FastNoiseLite
