@@ -23,13 +23,17 @@ const ArgumentType = Scratch.ArgumentType;
 					{
 						opcode: 'initNoise',
 						blockType: BlockType.COMMAND,
-						text: 'create noise id:[ID] type:[TYPE] octaves:[OCTAVES] frequency:[FREQUENCY] fractal: [FRACTAL] seed:[SEED]',
+						text: 'create noise id:[ID] seed:[SEED] type:[TYPE] octaves:[OCTAVES] frequency:[FREQUENCY] fractal:[FRACTAL] inverted?[INVERTED] easing:[EASING]',
 						arguments: {
 							ID: {
 								type: ArgumentType.STRING,
 								defaultValue: 'myNoise',
 							},
-							TYPE: {
+                            SEED: {
+								type: ArgumentType.NUMBER,
+								defaultValue: '0'
+							},
+                            TYPE: {
 								type: ArgumentType.STRING,
 								menu: 'NOISE_TYPE',
 								defaultValue: 'Perlin',
@@ -47,10 +51,16 @@ const ArgumentType = Scratch.ArgumentType;
                                 menu: 'FRACTAL_TYPE',
 								defaultValue: 'FBm',
 							},
-							SEED: {
-								type: ArgumentType.NUMBER,
-								defaultValue: '0'
+                            INVERTED: {
+								type: ArgumentType.STRING,
+                                menu: 'INVERTED_MENU',
+								defaultValue: 'false',
 							},
+                            EASING: {
+                                type: ArgumentType.STRING,
+                                menu: 'EASING_TYPE',
+								defaultValue: 'Linear',
+                            }
 						}
 					},
                     {
@@ -84,7 +94,15 @@ const ArgumentType = Scratch.ArgumentType;
 					},
                     FRACTAL_TYPE: {
                         acceptReporters: false,
-                        items: ['None', 'FMb', 'Ridged', 'Ping Pong'],
+                        items: ['None', 'FBm', 'Ridged', 'Ping Pong'],
+                    },
+                    INVERTED_MENU: {
+                        acceptReporters: true,
+                        items: ['true', 'false'],
+                    },
+                    EASING_TYPE: {
+                        acceptReporters: false,
+                        items: ['Linear', 'Squared', 'Cubed', 'Root'],
                     }
 				}
             };
@@ -92,50 +110,69 @@ const ArgumentType = Scratch.ArgumentType;
 
 		initNoise(args)
 		{
-			noises[args.ID] = new FastNoiseLite(args.SEED);
+			noises[args.ID] = [new FastNoiseLite(args.SEED), 0, 0];
 			switch(args.TYPE) {
 				case "OpenSimplex2":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+					noises[args.ID][0].SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
 					break;
 				case "OpenSimplex2S":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
+					noises[args.ID][0].SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
 					break;
 				case "Cellular":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+					noises[args.ID][0].SetNoiseType(FastNoiseLite.NoiseType.Cellular);
 					break;
 				case "Perlin":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+					noises[args.ID][0].SetNoiseType(FastNoiseLite.NoiseType.Perlin);
 					break;
 				case "Value Cubic":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.ValueCubic);
+					noises[args.ID][0].SetNoiseType(FastNoiseLite.NoiseType.ValueCubic);
 					break;
 				case "Value":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.Value);
+					noises[args.ID][0].SetNoiseType(FastNoiseLite.NoiseType.Value);
 					break;
 			  }
               switch(args.FRACTAL) {
 				case "None":
-					noises[args.ID].SetFractalType(FastNoiseLite.FractalType.None);
+					noises[args.ID][0].SetFractalType(FastNoiseLite.FractalType.None);
 					break;
-				case "FMb":
-					noises[args.ID].SetFractalType(FastNoiseLite.FractalType.FBm);
+				case "FBm":
+					noises[args.ID][0].SetFractalType(FastNoiseLite.FractalType.FBm);
 					break;
 				case "Ridged":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.Ridged);
+					noises[args.ID][0].SetFractalType(FastNoiseLite.FractalType.Ridged);
 					break;
 				case "Ping Pong":
-					noises[args.ID].SetNoiseType(FastNoiseLite.NoiseType.PingPong);
+					noises[args.ID][0].SetFractalType(FastNoiseLite.FractalType.PingPong);
 					break;
 			  }
-			  noises[args.ID].SetFrequency(args.FREQUENCY);
-			  noises[args.ID].SetFractalOctaves(args.OCTAVES);
+              noises[args.ID][2] = args.EASING;
+			  noises[args.ID][0].SetFrequency(args.FREQUENCY);
+			  noises[args.ID][0].SetFractalOctaves(args.OCTAVES);
+              noises[args.ID][1] = args.INVERTED;
 		}
 
 		getNoise(args)
 		{
 			if(args.ID in noises)
 			{
-				return noises[args.ID].GetNoise(args.X, args.Y, args.Z);
+                let value = noises[args.ID][0].GetNoise(args.X, args.Y, args.Z);
+                value = noises[args.ID][1] == 'true' ? value : -value;
+                value = (value + 1) / 2;
+                switch(noises[args.ID][2]) {
+                    case "Linear":
+                        break;
+                    case "Squared":
+                        value = Math.pow(value, 2);
+                        break;
+                    case "Cubed":
+                        value = Math.pow(value, 3);
+                        break;
+                    case "Root":
+                        value = Math.sqrt(Math.abs(value));
+                        break;
+                  }
+                value = (value * 2) - 1;
+				return value;
 			}
 			return 0;
 		}
